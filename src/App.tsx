@@ -36,6 +36,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // --- Types ---
 
+interface LocalUser {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string | null;
+  role: string;
+}
+
 type View = 'login' | 'register' | 'dashboard' | 'questionnaire' | 'chat' | 'settings';
 
 interface Message {
@@ -234,65 +242,170 @@ const Input = ({ icon: Icon, label, ...props }: any) => (
 
 // --- Views ---
 
-const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => (
-  <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
-    {/* Background Glows */}
-    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
-    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full" />
+const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md z-10"
-    >
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary-container mb-6 luminous-shadow">
-          <Shield className="w-8 h-8 text-on-primary-container" />
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    setTimeout(() => {
+      try {
+        const users = JSON.parse(localStorage.getItem('sanctuary_users') || '[]');
+        const user = users.find((u: any) => u.email === email && u.password === password);
+        
+        if (user) {
+          const localUser: LocalUser = {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            role: user.role
+          };
+          localStorage.setItem('sanctuary_current_user', JSON.stringify(localUser));
+          window.dispatchEvent(new Event('storage')); // Trigger update
+          onNavigate('dashboard');
+        } else {
+          setError('Invalid email or password. Please try again.');
+        }
+      } catch (err) {
+        setError('An error occurred during login.');
+      } finally {
+        setLoading(false);
+      }
+    }, 800);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md z-10"
+      >
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary-container mb-6 luminous-shadow">
+            <Shield className="w-8 h-8 text-on-primary-container" />
+          </div>
+          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">Luminescent Sanctuary</h1>
+          <p className="text-on-surface-variant font-medium">Neuro-Support AI for Every Family</p>
         </div>
-        <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">Luminescent Sanctuary</h1>
-        <p className="text-on-surface-variant font-medium">Neuro-Support AI for Every Family</p>
-      </div>
 
-      <Card className="p-8 space-y-6">
-        <div className="space-y-4">
-          <Input icon={Mail} type="email" placeholder="Email address" label="Email" />
-          <Input icon={Lock} type="password" placeholder="Password" label="Password" />
-        </div>
+        <Card className="p-8 space-y-6">
+          <form onSubmit={handleEmailLogin} className="space-y-6">
+            <div className="space-y-4">
+              <Input 
+                icon={Mail} 
+                type="email" 
+                placeholder="Email address" 
+                label="Email" 
+                value={email}
+                onChange={(e: any) => setEmail(e.target.value)}
+                required
+              />
+              <Input 
+                icon={Lock} 
+                type="password" 
+                placeholder="Password" 
+                label="Password" 
+                value={password}
+                onChange={(e: any) => setPassword(e.target.value)}
+                required
+              />
+            </div>
 
-        <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="rounded border-outline-variant bg-surface-container-low text-primary focus:ring-primary" />
-            <span className="text-on-surface-variant">Remember me</span>
-          </label>
-          <button className="text-primary font-semibold hover:underline">Forgot password?</button>
-        </div>
+            {error && (
+              <div className="p-3 rounded-xl bg-error/10 border border-error/20 text-error text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" /> {error}
+              </div>
+            )}
 
-        <Button className="w-full py-4" onClick={() => onNavigate('dashboard')}>
-          Login to Sanctuary
-        </Button>
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="rounded border-outline-variant bg-surface-container-low text-primary focus:ring-primary" />
+                <span className="text-on-surface-variant">Remember me</span>
+              </label>
+              <button type="button" className="text-primary font-semibold hover:underline">Forgot password?</button>
+            </div>
 
-        <div className="relative py-2">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-outline-variant"></div></div>
-          <div className="relative flex justify-center text-xs uppercase"><span className="bg-surface-container px-2 text-outline">Or continue with</span></div>
-        </div>
+            <Button type="submit" className="w-full py-4" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login to Sanctuary'}
+            </Button>
+          </form>
+        </Card>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" className="py-3">Google</Button>
-          <Button variant="outline" className="py-3">Apple</Button>
-        </div>
-      </Card>
-
-      <p className="text-center mt-8 text-on-surface-variant">
-        New to Sanctuary? <button onClick={() => onNavigate('register')} className="text-primary font-bold hover:underline">Create an account</button>
-      </p>
-    </motion.div>
-  </div>
-);
+        <p className="text-center mt-8 text-on-surface-variant">
+          New to Sanctuary? <button onClick={() => onNavigate('register')} className="text-primary font-bold hover:underline">Create an account</button>
+        </p>
+      </motion.div>
+    </div>
+  );
+};
 
 const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => void, onRegister: (name: string, email: string) => void }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    
+    setTimeout(() => {
+      try {
+        const users = JSON.parse(localStorage.getItem('sanctuary_users') || '[]');
+        
+        if (users.some((u: any) => u.email === email)) {
+          setError('This email is already registered.');
+          setLoading(false);
+          return;
+        }
+
+        const newUser = {
+          uid: Math.random().toString(36).substring(2, 15),
+          displayName: name,
+          email: email,
+          password: password, // In a real app, this would be hashed
+          role: 'user',
+          createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        localStorage.setItem('sanctuary_users', JSON.stringify(users));
+        
+        const localUser: LocalUser = {
+          uid: newUser.uid,
+          displayName: newUser.displayName,
+          email: newUser.email,
+          role: newUser.role
+        };
+        localStorage.setItem('sanctuary_current_user', JSON.stringify(localUser));
+        window.dispatchEvent(new Event('storage'));
+
+        onRegister(name, email);
+        onNavigate('questionnaire');
+      } catch (err) {
+        setError('An error occurred during registration.');
+      } finally {
+        setLoading(false);
+      }
+    }, 800);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
@@ -309,49 +422,61 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
         </div>
 
         <Card className="p-8 space-y-6">
-          <div className="space-y-4">
-            <Input 
-              icon={User} 
-              type="text" 
-              placeholder="Full name" 
-              label="Full Name" 
-              value={name}
-              onChange={(e: any) => setName(e.target.value)}
-            />
-            <Input 
-              icon={Mail} 
-              type="email" 
-              placeholder="Email address" 
-              label="Email" 
-              value={email}
-              onChange={(e: any) => setEmail(e.target.value)}
-            />
-            <Input icon={Lock} type="password" placeholder="Create password" label="Password" />
-            <Input icon={Lock} type="password" placeholder="Confirm password" label="Confirm Password" />
-          </div>
-
-          <div className="p-4 bg-error-container/20 rounded-2xl border border-error/20 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
-            <div className="text-xs text-on-error-container leading-relaxed">
-              <strong>Medical Disclaimer:</strong> Luminescent Sanctuary is an AI support tool and not a replacement for professional medical advice, diagnosis, or treatment.
+          <form onSubmit={handleRegisterSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <Input 
+                icon={User} 
+                type="text" 
+                placeholder="Full name" 
+                label="Full Name" 
+                value={name}
+                onChange={(e: any) => setName(e.target.value)}
+                required
+              />
+              <Input 
+                icon={Mail} 
+                type="email" 
+                placeholder="Email address" 
+                label="Email" 
+                value={email}
+                onChange={(e: any) => setEmail(e.target.value)}
+                required
+              />
+              <Input 
+                icon={Lock} 
+                type="password" 
+                placeholder="Create password" 
+                label="Password" 
+                value={password}
+                onChange={(e: any) => setPassword(e.target.value)}
+                required
+              />
             </div>
-          </div>
 
-          <label className="flex items-start gap-3 cursor-pointer group">
-            <input type="checkbox" className="mt-1 rounded border-outline-variant bg-surface-container-low text-primary focus:ring-primary" />
-            <span className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
-              I understand the medical disclaimer and agree to the Terms of Service and Privacy Policy.
-            </span>
-          </label>
+            {error && (
+              <div className="p-3 rounded-xl bg-error/10 border border-error/20 text-error text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" /> {error}
+              </div>
+            )}
 
-          <Button className="w-full py-4" onClick={() => {
-            if (name && email) {
-              onRegister(name, email);
-              onNavigate('questionnaire');
-            }
-          }}>
-            Create Account
-          </Button>
+            <div className="p-4 bg-error-container/20 rounded-2xl border border-error/20 flex gap-3">
+              <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+              <div className="text-xs text-on-error-container leading-relaxed">
+                <strong>Medical Disclaimer:</strong> Luminescent Sanctuary is an AI support tool and not a replacement for professional medical advice, diagnosis, or treatment.
+              </div>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" required className="mt-1 rounded border-outline-variant bg-surface-container-low text-primary focus:ring-primary" />
+              <span className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
+                I understand the medical disclaimer and agree to the Terms of Service and Privacy Policy.
+              </span>
+            </label>
+
+            <Button type="submit" className="w-full py-4" disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </Button>
+          </form>
         </Card>
 
         <p className="text-center mt-8 text-on-surface-variant">
@@ -417,7 +542,11 @@ const Sidebar = ({ active, onNavigate }: { active: View, onNavigate: (v: View) =
         </div>
 
         <button 
-          onClick={() => onNavigate('login')}
+          onClick={() => {
+            localStorage.removeItem('sanctuary_current_user');
+            window.dispatchEvent(new Event('storage'));
+            onNavigate('login');
+          }}
           className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-error hover:bg-error/10 transition-all font-medium"
         >
           <LogOut className="w-5 h-5" />
@@ -1141,6 +1270,7 @@ const SettingsView = ({ userName, userEmail, assessmentAnswers }: { userName: st
 
 export default function App() {
   const [view, setView] = useState<View>('login');
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('sanctuary_user_name') || '');
   const [userEmail, setUserEmail] = useState<string>(() => localStorage.getItem('sanctuary_user_email') || '');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>(() => {
@@ -1148,11 +1278,34 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  useEffect(() => {
+    const checkAuth = () => {
+      const savedUser = localStorage.getItem('sanctuary_current_user');
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setUserEmail(parsedUser.email);
+        setUserName(parsedUser.displayName);
+        
+        if (view === 'login' || view === 'register') {
+          setView('dashboard');
+        }
+      } else {
+        setUser(null);
+        if (!['login', 'register'].includes(view)) {
+          setView('login');
+        }
+      }
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, [view]);
+
   const handleRegister = (name: string, email: string) => {
     setUserName(name);
     setUserEmail(email);
-    localStorage.setItem('sanctuary_user_name', name);
-    localStorage.setItem('sanctuary_user_email', email);
   };
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
