@@ -265,7 +265,7 @@ const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => {
     
     setTimeout(() => {
       try {
-        const users = JSON.parse(localStorage.getItem('sanctuary_users') || '[]');
+        const users = JSON.parse(localStorage.getItem('neurobridge_users') || localStorage.getItem('sanctuary_users') || '[]');
         const user = users.find((u: any) => u.email === email && u.password === password);
         
         if (user) {
@@ -275,7 +275,7 @@ const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => {
             email: user.email,
             role: user.role
           };
-          localStorage.setItem('sanctuary_current_user', JSON.stringify(localUser));
+          localStorage.setItem('neurobridge_current_user', JSON.stringify(localUser));
           window.dispatchEvent(new Event('storage')); // Trigger update
           onNavigate('dashboard');
         } else {
@@ -304,7 +304,7 @@ const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary-container mb-6 luminous-shadow">
             <Shield className="w-8 h-8 text-on-primary-container" />
           </div>
-          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">Luminescent Sanctuary</h1>
+          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">NeuroBridge tools</h1>
           <p className="text-on-surface-variant font-medium">Neuro-Support AI for Every Family</p>
         </div>
 
@@ -346,13 +346,13 @@ const LoginView = ({ onNavigate }: { onNavigate: (v: View) => void }) => {
             </div>
 
             <Button type="submit" className="w-full py-4" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login to Sanctuary'}
+              {loading ? 'Logging in...' : 'Login to NeuroBridge'}
             </Button>
           </form>
         </Card>
 
         <p className="text-center mt-8 text-on-surface-variant">
-          New to Sanctuary? <button onClick={() => onNavigate('register')} className="text-primary font-bold hover:underline">Create an account</button>
+          New to NeuroBridge? <button onClick={() => onNavigate('register')} className="text-primary font-bold hover:underline">Create an account</button>
         </p>
       </motion.div>
     </div>
@@ -377,7 +377,7 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
     
     setTimeout(() => {
       try {
-        const users = JSON.parse(localStorage.getItem('sanctuary_users') || '[]');
+        const users = JSON.parse(localStorage.getItem('neurobridge_users') || localStorage.getItem('sanctuary_users') || '[]');
         
         if (users.some((u: any) => u.email === email)) {
           setError('This email is already registered.');
@@ -395,7 +395,7 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
         };
 
         users.push(newUser);
-        localStorage.setItem('sanctuary_users', JSON.stringify(users));
+        localStorage.setItem('neurobridge_users', JSON.stringify(users));
         
         const localUser: LocalUser = {
           uid: newUser.uid,
@@ -403,7 +403,7 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
           email: newUser.email,
           role: newUser.role
         };
-        localStorage.setItem('sanctuary_current_user', JSON.stringify(localUser));
+        localStorage.setItem('neurobridge_current_user', JSON.stringify(localUser));
         window.dispatchEvent(new Event('storage'));
 
         onRegister(name, email);
@@ -427,7 +427,7 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
         className="w-full max-w-md z-10"
       >
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">Join the Sanctuary</h1>
+          <h1 className="text-4xl font-headline font-extrabold text-on-surface mb-3 tracking-tight">Join NeuroBridge</h1>
           <p className="text-on-surface-variant font-medium">Start your journey to family balance</p>
         </div>
 
@@ -472,7 +472,7 @@ const RegisterView = ({ onNavigate, onRegister }: { onNavigate: (v: View) => voi
             <div className="p-4 bg-error-container/20 rounded-2xl border border-error/20 flex gap-3">
               <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
               <div className="text-xs text-on-error-container leading-relaxed">
-                <strong>Medical Disclaimer:</strong> Luminescent Sanctuary is an AI support tool and not a replacement for professional medical advice, diagnosis, or treatment.
+                <strong>Medical Disclaimer:</strong> NeuroBridge tools is an AI support tool and not a replacement for professional medical advice, diagnosis, or treatment.
               </div>
             </div>
 
@@ -512,7 +512,7 @@ const Sidebar = ({ active, onNavigate }: { active: View, onNavigate: (v: View) =
           <div className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
             <Shield className="w-6 h-6 text-on-primary-container" />
           </div>
-          <span className="font-headline font-bold text-lg tracking-tight">Sanctuary</span>
+          <span className="font-headline font-bold text-lg tracking-tight">NeuroBridge</span>
         </div>
 
         <nav className="space-y-2">
@@ -553,7 +553,7 @@ const Sidebar = ({ active, onNavigate }: { active: View, onNavigate: (v: View) =
 
         <button 
           onClick={() => {
-            localStorage.removeItem('sanctuary_current_user');
+            localStorage.removeItem('neurobridge_current_user');
             window.dispatchEvent(new Event('storage'));
             onNavigate('login');
           }}
@@ -579,7 +579,7 @@ const DashboardView = ({ onNavigate, userName, assessmentAnswers }: { onNavigate
 
     doc.setFontSize(22);
     doc.setTextColor(40, 40, 40);
-    doc.text('Luminescent Sanctuary Profile', margin, y);
+    doc.text('NeuroBridge Profile', margin, y);
     y += 15;
 
     doc.setFontSize(14);
@@ -611,7 +611,7 @@ const DashboardView = ({ onNavigate, userName, assessmentAnswers }: { onNavigate
       y += 10;
     });
 
-    doc.save(`${userName.replace(/\s+/g, '_')}_Sanctuary_Profile.pdf`);
+    doc.save(`${userName.replace(/\s+/g, '_')}_NeuroBridge_Profile.pdf`);
   };
 
   return (
@@ -619,7 +619,7 @@ const DashboardView = ({ onNavigate, userName, assessmentAnswers }: { onNavigate
       <header className="flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-headline font-extrabold tracking-tight mb-2">Welcome back, {userName || 'Friend'}</h2>
-          <p className="text-on-surface-variant font-medium">Your sanctuary is ready to support you today.</p>
+          <p className="text-on-surface-variant font-medium">Your NeuroBridge is ready to support you today.</p>
         </div>
         <div className="flex items-center gap-4">
           <button className="p-3 rounded-2xl bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all">
@@ -664,7 +664,7 @@ const DashboardView = ({ onNavigate, userName, assessmentAnswers }: { onNavigate
 
           <Card className="col-span-4 p-8 bg-secondary-container/10 border-secondary/20">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="font-headline font-bold text-xl">Sanctuary Pulse</h3>
+              <h3 className="font-headline font-bold text-xl">NeuroBridge Pulse</h3>
               <Heart className="w-6 h-6 text-secondary" />
             </div>
             <div className="space-y-6">
@@ -815,7 +815,7 @@ const QuestionnaireView = ({ onNavigate, onComplete }: { onNavigate: (v: View) =
                 <Brain className="w-10 h-10 text-primary" />
               </div>
               <h2 className="text-4xl font-headline font-extrabold tracking-tight">Assessment Complete!</h2>
-              <p className="text-on-surface-variant text-lg">Based on your answers, here are some initial suggestions for your sanctuary:</p>
+              <p className="text-on-surface-variant text-lg">Based on your answers, here are some initial suggestions for your NeuroBridge tools:</p>
             </div>
 
             {isGenerating ? (
@@ -1040,7 +1040,7 @@ const ChatView = ({
           }
         ],
         config: {
-          systemInstruction: "You are Luminescent Sanctuary Guide, a compassionate AI support tool for families with neurodivergent children. Your goal is to provide neuro-affirming guidance, practical strategies, and emotional support. Use the user's assessment data to personalize your responses. Be concise, empathetic, and always include a medical disclaimer when appropriate. Never give medical diagnoses."
+          systemInstruction: "You are NeuroBridge Guide, a compassionate AI support tool for families with neurodivergent children. Your goal is to provide neuro-affirming guidance, practical strategies, and emotional support. Use the user's assessment data to personalize your responses. Be concise, empathetic, and always include a medical disclaimer when appropriate. Never give medical diagnoses."
         }
       });
 
@@ -1149,7 +1149,7 @@ const ChatView = ({
               <Shield className="w-6 h-6 text-on-primary-container" />
             </div>
             <div>
-              <h3 className="font-bold">{currentSession?.title || "Sanctuary Guide"}</h3>
+              <h3 className="font-bold">{currentSession?.title || "NeuroBridge Guide"}</h3>
               <p className="text-[10px] text-primary flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" /> Active Support
               </p>
@@ -1258,7 +1258,7 @@ const HistoryView = ({ onNavigate, sessions, assessmentAnswers }: { onNavigate: 
           <button onClick={() => onNavigate('dashboard')} className="text-on-surface-variant hover:text-on-surface flex items-center gap-2 font-bold mb-4">
             <ChevronLeft className="w-5 h-5" /> Back to Dashboard
           </button>
-          <h2 className="text-4xl font-headline font-extrabold tracking-tight mb-2">Sanctuary History</h2>
+          <h2 className="text-4xl font-headline font-extrabold tracking-tight mb-2">NeuroBridge History</h2>
           <p className="text-on-surface-variant font-medium">Review your past assessments and support conversations.</p>
         </div>
       </header>
@@ -1421,7 +1421,7 @@ const SettingsView = ({ userName, userEmail, assessmentAnswers }: { userName: st
 
     doc.setFontSize(22);
     doc.setTextColor(40, 40, 40);
-    doc.text('Luminescent Sanctuary Profile', margin, y);
+    doc.text('NeuroBridge Profile', margin, y);
     y += 15;
 
     doc.setFontSize(14);
@@ -1455,14 +1455,14 @@ const SettingsView = ({ userName, userEmail, assessmentAnswers }: { userName: st
       y += 10;
     });
 
-    doc.save(`${userName.replace(/\s+/g, '_')}_Sanctuary_Profile.pdf`);
+    doc.save(`${userName.replace(/\s+/g, '_')}_NeuroBridge_Profile.pdf`);
   };
 
   return (
     <div className="flex-1 h-screen overflow-y-auto custom-scrollbar p-10 space-y-10">
       <header>
         <h2 className="text-4xl font-headline font-extrabold tracking-tight mb-2">Settings & Profile</h2>
-        <p className="text-on-surface-variant font-medium">Manage your sanctuary and view your assessment data.</p>
+        <p className="text-on-surface-variant font-medium">Manage your NeuroBridge tools and view your assessment data.</p>
       </header>
 
       <div className="grid grid-cols-12 gap-8">
@@ -1601,36 +1601,36 @@ const SettingsView = ({ userName, userEmail, assessmentAnswers }: { userName: st
 export default function App() {
   const [view, setView] = useState<View>('login');
   const [user, setUser] = useState<LocalUser | null>(null);
-  const [userName, setUserName] = useState<string>(() => localStorage.getItem('sanctuary_user_name') || '');
-  const [userEmail, setUserEmail] = useState<string>(() => localStorage.getItem('sanctuary_user_email') || '');
+  const [userName, setUserName] = useState<string>(() => localStorage.getItem('neurobridge_user_name') || localStorage.getItem('sanctuary_user_name') || '');
+  const [userEmail, setUserEmail] = useState<string>(() => localStorage.getItem('neurobridge_user_email') || localStorage.getItem('sanctuary_user_email') || '');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>(() => {
-    const saved = localStorage.getItem('sanctuary_assessment');
+    const saved = localStorage.getItem('neurobridge_assessment') || localStorage.getItem('sanctuary_assessment');
     return saved ? JSON.parse(saved) : [];
   });
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    const saved = localStorage.getItem('sanctuary_sessions');
+    const saved = localStorage.getItem('neurobridge_sessions') || localStorage.getItem('sanctuary_sessions');
     return saved ? JSON.parse(saved) : [];
   });
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
-    const saved = localStorage.getItem('sanctuary_current_session_id');
+    const saved = localStorage.getItem('neurobridge_current_session_id') || localStorage.getItem('sanctuary_current_session_id');
     return saved || null;
   });
 
   useEffect(() => {
-    localStorage.setItem('sanctuary_sessions', JSON.stringify(sessions));
+    localStorage.setItem('neurobridge_sessions', JSON.stringify(sessions));
   }, [sessions]);
 
   useEffect(() => {
     if (currentSessionId) {
-      localStorage.setItem('sanctuary_current_session_id', currentSessionId);
+      localStorage.setItem('neurobridge_current_session_id', currentSessionId);
     } else {
-      localStorage.removeItem('sanctuary_current_session_id');
+      localStorage.removeItem('neurobridge_current_session_id');
     }
   }, [currentSessionId]);
 
   useEffect(() => {
     const checkAuth = () => {
-      const savedUser = localStorage.getItem('sanctuary_current_user');
+      const savedUser = localStorage.getItem('neurobridge_current_user') || localStorage.getItem('sanctuary_current_user');
       if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
@@ -1660,7 +1660,7 @@ export default function App() {
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
-    localStorage.setItem('sanctuary_assessment', JSON.stringify(answers));
+    localStorage.setItem('neurobridge_assessment', JSON.stringify(answers));
   };
 
   const renderView = () => {
