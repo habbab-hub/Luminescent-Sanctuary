@@ -1026,7 +1026,11 @@ const ChatView = ({
     setIsTyping(true);
 
     try {
-      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('GEMINI_API_KEY is not configured. Please add it in the Settings > Secrets menu.');
+      }
+      const genAI = new GoogleGenAI({ apiKey });
       const model = await genAI.models.generateContentStream({
         model: "gemini-3-flash-preview",
         contents: [
